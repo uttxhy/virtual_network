@@ -21,7 +21,7 @@ function adminLogin {
 # $1: userName $2:machine to connect
 	flag=flase
 
-	while read login level password;
+	while read login level password msg;
 	do
 		if [[ $login == $1 ]] && [[ $level == 0 ]] && [[ $password == $2 ]]
 		then
@@ -66,14 +66,14 @@ else
 	elif [[ $1 == '--connect' ]] || [[ $1 == '-c' ]] && [[ $# -eq 3 ]]; then
 
 		#statements
-		while read userName machineName dateStr timeStr ttyCur
-		do
-			if [[ $userName == $3 ]] && [[ $machineName != $2 ]]; then
-				flag=true
-				echo "User $3 has already connected to $machineName, one user cannot connect two machines at the same time!"
-				exit			
-			fi
-		done < ./tables/User_Machine
+		# while read userName machineName dateStr timeStr ttyCur
+		# do
+		# 	if [[ $userName == $3 ]] && [[ $machineName != $2 ]]; then
+		# 		flag=true
+		# 		echo "User $3 has already connected to $machineName, one user cannot connect two machines at the same time!"
+		# 		exit			
+		# 	fi
+		# done < ./tables/User_Machine
 
 		echo "Mode Connect: connect to $2"
 		echo "Password of $3:"

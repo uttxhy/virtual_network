@@ -12,7 +12,7 @@ function connectLogin {
 	flag1=false
 	flag2=false
 
-	while read userName userLevel password
+	while read userName userLevel password finger
 	do
 		if [[ $userName == $1 ]] && [[ $password == $3 ]]
 		then
@@ -53,7 +53,7 @@ function connectLogin {
 		echo $1 $2 $date "null" $ttyCur >> ./tables/User_Machine
 		echo 'Connexion successful'
 		echo "We already connect $1 to $2"
-		sleep 3
+		sleep 1
 		clear
 		connect_func $1 $2
 
@@ -81,173 +81,191 @@ function connect_func {
 	echo 'Mode users'
 	title $1 $2
 
+	tmp=null
+	ttyCur=$(echo $(tty) | sed "s/\///g")
+	#tmp = msg
+	while read userName machineName dateStr timeStr msg ttyLogin
+	do
+		if [[ $ttyCur == $ttyLogin ]]
+		then
+			tmp=$msg
+		fi
+	done < ./tables/User_Machine
+
 	flag3=false
 	flag4=false
 
-	while read input
-
+	while true
 	do
+		while read userName machineName dateStr timeStr msg ttyLogin
+		do
+			if [[ $ttyCur == $ttyLogin ]] && [[ $tmp != $msg ]]
+			then
+				echo "$msg"
+				tmp=$msg
+				title $1 $2
+			fi
+		done < ./tables/User_Machine
 
-		if [[ "$input" != "exit" ]]; then
+		if read -t 0.1 input
+		then
 
-		   case "$input" in
+			if [[ "$input" != "exit" ]]; then
 
-			"who")
+			   case "$input" in
 
-			  ./commande_who $2;;
+				"who")
 
-			"rusers")
+				  ./commande_who $2;;
 
-			  ./commande_rusers;;
+				"rusers")
 
-			"rhost")
+				  ./commande_rusers;;
 
-			  rhost
+				"rhost")
 
-			;;
+				  ./commande_rhost $2;;
 
-			"connect")
-				echo "Which machine do you want to connect?"
-				read newMachine
+				"connect")
+					echo "Which machine do you want to connect?"
+					read newMachine
 
-				userName=$1
-				oldMachine=$2
-				flag3=false
-				flag4=false
-				flag5=false
+					userName=$1
+					oldMachine=$2
+					flag3=false
+					flag4=false
+					flag5=false
 
-				#Justify if the new machine equals old machine
-				if [ $oldMachine == $newMachine ]
-				then
-					echo "You've already connect to this machine!"
-					title $1 $2
-					continue
-					
-				fi
-
-				#Justify if the new machine exists
-				while read machineName machineLevel machineRelie
-				do
-					if [ $newMachine == $machineName ]
+					#Justify if the new machine equals old machine
+					if [ $oldMachine == $newMachine ]
 					then
-						flag3=true
-					fi 
-				done < ./tables/Machine
-
-				if [ $flag3 == false ]
-				then
-					echo "$newMachine doesn't exist in this network!"
-					title $1 $2
-					continue
-				
-				fi
-
-				while read machineName machineLevel machineRelie
-				do
-					if [ $oldMachine == $machineName ] && [ $newMachine == $machineRelie ]
-					then
-						flag4=true
+						echo "You've already connect to this machine!"
+						title $1 $2
+						continue
 						
 					fi
-				done < ./tables/Machine
 
-				if [ $flag4 == false ]
-				then
-					echo "$newMachine isn't joined to $oldMachine, so you cannot connect to $newMachine"
-					title $1 $2
-					continue
-				fi
+					#Justify if the new machine exists
+					while read machineName machineLevel machineRelie
+					do
+						if [ $newMachine == $machineName ]
+						then
+							flag3=true
+						fi 
+					done < ./tables/Machine
 
-				#connect to the new machine
-				echo "Password of $userName:"
-				read -s password
-				echo $password
-				echo 'Wait...'
-
-				while read userName userLevel pwd
-				do
-					if [[ $userName == $1 ]] && [[ $password == $pwd ]]
+					if [ $flag3 == false ]
 					then
-						flag5=true
-						echo "Password right, search $2"
-
+						echo "$newMachine doesn't exist in this network!"
+						title $1 $2
+						continue
+					
 					fi
-				done < ./tables/User
-				if [ $flag5 == false ] 
-				then
-					echo "User or password not correct!"
-					echo "sdsfsfe"
-					title $1 $2
-					continue
-				fi
 
-				connectLogin $1 $newMachine $password
+					while read machineName machineLevel machineRelie
+					do
+						if [ $oldMachine == $machineName ] && [ $newMachine == $machineRelie ]
+						then
+							flag4=true
+							
+						fi
+					done < ./tables/Machine
+
+					if [ $flag4 == false ]
+					then
+						echo "$newMachine isn't joined to $oldMachine, so you cannot connect to $newMachine"
+						title $1 $2
+						continue
+					fi
+
+					#connect to the new machine
+					echo "Password of $userName:"
+					read -s password
+					echo $password
+					echo 'Wait...'
+
+					while read userName userLevel passwd finger
+					do
+						if [[ $userName == $1 ]] && [[ $password == $passwd ]]
+						then
+							flag5=true
+							echo "Password right, search $2"
+
+						fi
+					done < ./tables/User
+					if [ $flag5 == false ] 
+					then
+						echo "User or password not correct!"
+						echo "sdsfsfe"
+						title $1 $2
+						continue
+					fi
+
+					connectLogin $1 $newMachine $password
+					break
+								    #./commande_connect $1 $2
+				 
+				;;
+				  
+
+				"su")
+					echo "Which user do you want to change to?"
+					read newUser
+
+				  ./commande_su $1 $2
+
+				;;
+
+				"passwd")
+
+				  passwd
+
+				;;
+
+				"finger")
+
+				  finger
+
+				;;
+
+				"write "*"@"*" "*)
+
+				  write $input
+
+				;;
+
+				"clear")
+
+				  clear
+
+				;;
+
+				*)
+
+				  echo ""
+
+				  echo $input": command not found"
+
+				  echo ""		  
+				;;
+
+			   esac
+
+			else
+				ttyCur=$(echo $(tty) | sed "s/\///g")
+				sed -i "/$1.*$ttyCur/d" ./tables/User_Machine
 				break
-							    #./commande_connect $1 $2
-			 
-			;;
-			  
 
-			"su")
-
-			  su
-
-			;;
-
-			"passwd")
-
-			  passwd
-
-			;;
-
-			"finger")
-
-			  finger
-
-			;;
-
-			"write "*"@"*" "*)
-
-			  write $input
-
-			;;
-
-			"clear")
-
-			  clear
-
-			;;
-
-			*)
-
-			  echo ""
-
-			  echo $input": command not found"
-
-			  echo ""		  
-			;;
-
-		   esac
-
-		else
-			ttyCur=$(echo $(tty) | sed "s/\///g")
-			sed -i "/$1.*$ttyCur/d" ./tables/User_Machine
-			break
+			fi
+			title $1 $2
 
 		fi
-		title $1 $2
-
 	done
-	echo ""
-	echo "Exit System"
-	echo ""
-	
+		echo ""
+		echo "Exit System"
+		echo ""	
 }
 
-
-function print {
-	echo "sdsd"
-}
 
 function who {
 
@@ -291,12 +309,12 @@ function passwd {
 }
 
 function write {
-
-	echo 'who'
+	user=$(echo $2 | cut -d '@' -f1)
+	machine=$(echo $2 | cut -d '@' -f2)
+	newMsg=$3
+	sed -i "s/\($user $machine [^ ]* [^ ]* \)\([^ ]*\)\( [^ ]*\)/\1$newMsg\3/g" ./tables/User_Machine
 }
 
 # Main
 
 connectLogin $1 $2 $3
-
-
