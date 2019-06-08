@@ -36,16 +36,21 @@ function connectLogin {
 
 	if [ $flag1 == true ] && [ $flag2 == true ]
 	then
+		ttyCur=$(echo $(tty) | sed "s/\///g")
+		echo $ttyCur
+		sed -i "/$1.*$ttyCur/d" ./tables/User_Machine
 		#delete old user and machine in table User_Machine
-		while read userName machineName
-		do
-			if [ $1 == $userName ] && [ $2 != $machineName ]
-			then
-				sed -i "/$userName/d" ./tables/User_Machine
-			fi
- 		done < ./tables/User_Machine	
+		# while read userName machineName dateStr timeStr ttyLogin
+		# do
+		# 	ttyCur=$(tty)
+		# 	if [ $1 == $userName ] && [ $2 != $machineName ]
+		# 	then
+		# 		sed -i "/$userName/d" ./tables/User_Machine
+		# 	fi
+ 	# 	done < ./tables/User_Machine	
 		
-		echo $1 $2 >> ./tables/User_Machine
+		date=$(date "+%Y-%m-%d %H:%M:%S")
+		echo $1 $2 $date "null" $ttyCur >> ./tables/User_Machine
 		echo 'Connexion successful'
 		echo "We already connect $1 to $2"
 		sleep 3
@@ -225,6 +230,8 @@ function connect_func {
 		   esac
 
 		else
+			ttyCur=$(echo $(tty) | sed "s/\///g")
+			sed -i "/$1.*$ttyCur/d" ./tables/User_Machine
 			break
 
 		fi

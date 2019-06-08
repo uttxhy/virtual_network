@@ -1,9 +1,9 @@
 #!/bin/bash
 
-while read userName machineName
+while read userName machineName dateStr timeStr
 do
-	if [ $1 == $machineName ]
+	if [[ $1 == $machineName ]]
 	then
-		echo $userName 
+		echo $userName $dateStr $timeStr
 	fi
 done < ./tables/User_Machine

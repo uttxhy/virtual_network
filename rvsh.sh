@@ -31,7 +31,7 @@ function adminLogin {
 	done < users
 
 
-	if [ $flag == true ]
+	if [[ $flag == true ]]
 	then
 		echo 'Login admin successful'
 		echo 'Hello admin'
@@ -48,7 +48,7 @@ function adminLogin {
 
 # Main
 
-if [ ! -f admin ] || [ ! -f connect ] || [ ! -f ./tables/User ] 
+if [[ ! -f admin ]] || [[ ! -f connect ]] || [[ ! -f ./tables/User ]]
 then
 	printFileError
 else
@@ -66,7 +66,7 @@ else
 	elif [[ $1 == '--connect' ]] || [[ $1 == '-c' ]] && [[ $# -eq 3 ]]; then
 
 		#statements
-		while read userName machineName
+		while read userName machineName dateStr timeStr ttyCur
 		do
 			if [[ $userName == $3 ]] && [[ $machineName != $2 ]]; then
 				flag=true
