@@ -1,0 +1,13 @@
+#!/bin/bash
+
+while read userName userLevel password
+do
+	user=$userName
+	while read userName machineName
+	do
+		if [ $user == $userName ]
+		then
+			echo "$userName $machineName"
+		fi
+	done < ./tables/User_Machine
+done < ./tables/User

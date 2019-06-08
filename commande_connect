@@ -1,0 +1,54 @@
+#!/bin/bash
+
+echo "Which machine do you want to connect?"
+read newMachine
+
+userName=$1
+oldMachine=$2
+flag1=false
+flag2=false
+
+#Justify if the new machine equals old machine
+if [ $oldMachine == $newMachine ]
+then
+	echo "You've already connect to this machine!"
+	exit
+fi
+
+#Justify if the new machine exists
+while read machineName machineLevel machineRelie
+do
+	if [ $newMachine == $machineName ]
+	then
+		flag1=true
+	fi 
+done < ./tables/Machine
+
+if [ $flag1 == false ]
+then
+	echo "$newMachine doesn't exist in this network!"
+	exit
+fi
+
+while read machineName machineLevel machineRelie
+do
+	if [ $oldMachine == $machineName ] && [ $newMachine == $machineRelie ]
+	then
+		flag2=true
+		
+	fi
+done < ./tables/Machine
+
+if [ $flag2 == false ]
+then
+	echo "$newMachine isn't joined to $oldMachine, so you cannot connect to $newMachine"
+	exit
+fi
+
+#connect to the new machine
+echo "Password of $userName:"
+read -s password
+echo $password
+echo 'Wait...'
+./connect $userName $newMachine $password
+

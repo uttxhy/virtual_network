@@ -1,0 +1,9 @@
+#!/bin/bash
+
+while read userName machineName
+do
+	if [ $1 == $machineName ]
+	then
+		echo $userName 
+	fi
+done < ./tables/User_Machine
