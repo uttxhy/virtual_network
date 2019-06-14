@@ -1,9 +1,9 @@
 #!/bin/bash
 
-while read machineCur machineLevel machineRelie
+while read machineCur machineRelie
 do
 	if [[ $1 == $machineCur ]]
 	then
 		echo $machineRelie
 	fi
-done < ./tables/Machine
+done < ./tables/Machine_Relie

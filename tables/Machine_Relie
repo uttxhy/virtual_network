@@ -1,0 +1,7 @@
+machine1 machine2
+machine1 machine5
+machine2 machine1
+machine2 machine3
+machine3 machine2
+machine4 null
+machine5 machine1

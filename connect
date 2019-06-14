@@ -146,7 +146,7 @@ function connect_func {
 					fi
 
 					#Justify if the new machine exists
-					while read machineName machineLevel machineRelie
+					while read machineName machineLevel
 					do
 						if [ $newMachine == $machineName ]
 						then
@@ -162,14 +162,14 @@ function connect_func {
 					
 					fi
 
-					while read machineName machineLevel machineRelie
+					while read machineName machineRelie
 					do
 						if [ $oldMachine == $machineName ] && [ $newMachine == $machineRelie ]
 						then
 							flag4=true
 							
 						fi
-					done < ./tables/Machine
+					done < ./tables/Machine_Relie
 
 					if [ $flag4 == false ]
 					then
@@ -196,7 +196,6 @@ function connect_func {
 					if [ $flag5 == false ] 
 					then
 						echo "User or password not correct!"
-						echo "sdsfsfe"
 						title $1 $2
 						continue
 					fi
@@ -218,13 +217,13 @@ function connect_func {
 
 				"passwd")
 
-				  passwd
+				  passwd $1
 
 				;;
 
 				"finger")
 
-				  finger
+				  finger $1
 
 				;;
 
@@ -304,8 +303,21 @@ function su {
 }
 
 function passwd {
+	echo "Please enter the original password: "
+	read oldPasswd
+	if [[ $oldPasswd == $(grep "$1" ./tables/User | cut -d' ' -f3) ]]; then
+	 	#statements
+	 	echo "Please enter the new password: "
+	 	read newPasswd
+	 	sed -i "s/\($1 [^ ]* \)\([^ ]*\)\( [^ ]*\)/\1$newPasswd\3/g" ./tables/User
+	 	echo "The password is successfully changed!"
+	 else
+	 	echo "The password is incorrect!"
+	 fi 
+}
 
-	echo 'who'
+function finger {
+	grep "$1" ./tables/User | cut -d' ' -f4 | sed "s/_/ /g"
 }
 
 function write {

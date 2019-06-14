@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while read userName machineName dateStr timeStr
+while read userName machineName dateStr timeStr message terminal
 do
 	if [[ $1 == $machineName ]]
 	then

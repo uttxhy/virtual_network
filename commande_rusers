@@ -3,11 +3,11 @@
 while read userName userLevel password
 do
 	user=$userName
-	while read userName machineName dateStr timeStr ttyName
+	while read userName machineName dateStr timeStr message terminal
 	do
 		if [ $user == $userName ]
 		then
-			echo "$userName $machineName $dateStr $timeStr $ttyName"
+			echo "$userName $machineName $dateStr $timeStr"
 		fi
 	done < ./tables/User_Machine
 done < ./tables/User
