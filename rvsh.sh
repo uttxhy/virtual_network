@@ -17,34 +17,6 @@ function printFileError {
 }
 
 
-function adminLogin {
-# $1: userName $2:machine to connect
-	flag=flase
-
-	while read login level password msg;
-	do
-		if [[ $login == $1 ]] && [[ $level == 0 ]] && [[ $password == $2 ]]
-		then
-			flag=true
-			break
-		fi
-	done < users
-
-
-	if [[ $flag == true ]]
-	then
-		echo 'Login admin successful'
-		echo 'Hello admin'
-		sleep 2
-		clear
-		./admin $1
-	else
-		echo 'login error or password error!'
-		exit
-	fi
-
-}
-
 
 # Main
 
@@ -59,8 +31,16 @@ else
 		echo 'Password of admin:'
 		read -s password
 		echo 'Wait...'
-		adminLogin 'admin' $password
-
+		if [[ $password == 'admin' ]]
+		then
+			echo 'Login admin successful'
+			echo 'Hello admin'
+			sleep 2
+			clear
+			./admin $1
+		else
+			echo "password wrong"
+		fi
 	elif [[ $1 == '--help' ]] || [[ $1 == '-h' ]]; then
 		echo 'help....'
 	elif [[ $1 == '--connect' ]] || [[ $1 == '-c' ]] && [[ $# -eq 3 ]]; then

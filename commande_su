@@ -1,3 +1,45 @@
 #!/bin/bash
 
-echo $1 $2
+# echo $1 $2 $4
+oldUser=$1
+machine=$2
+newUser=$4
+
+flag1=false
+
+while read ligne
+do
+	if [[ $newUser == $(echo $ligne | cut -d' ' -f1) ]]; then
+		flag1=true
+		echo "Please enter the password of $oldUser: "
+		read passwd
+		if [[ $passwd != $(grep "$oldUser" ./tables/User | cut -d' ' -f3) ]]; then
+			echo "Password incorrect!"
+			break
+		else
+			echo "Password correct"
+		fi
+
+		userLevel=$(grep "$newUser" ./tables/User | cut -d' ' -f2)
+		machineLevel=$(grep "$machine" ./tables/Machine | cut -d' ' -f2)
+		if [[ $userLevel > $machineLevel ]]; then
+			echo "$newUser doesn't have the permission to connect $machine"
+			break
+		else
+			ttyCur=$(echo $(tty) | sed "s/\///g")
+			# delete old tty
+			sed -i "/$oldUser.*$ttyCur/d" ./tables/User_Machine
+			date=$(date "+%Y-%m-%d %H:%M:%S")
+			echo $newUser $machine $date "null" $ttyCur >> ./tables/User_Machine
+			echo 'Connexion successful'
+			echo "We already connect $newUser to $machine"
+			./connect_func $1 $2
+	fi
+done < ./tables/User
+
+if [[ $flag1 == false ]]; then
+	echo "We can't find this user"
+fi
+
+
+

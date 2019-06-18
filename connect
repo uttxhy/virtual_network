@@ -37,7 +37,7 @@ function connectLogin {
 	if [ $flag1 == true ] && [ $flag2 == true ]
 	then
 		ttyCur=$(echo $(tty) | sed "s/\///g")
-		echo $ttyCur
+		# delete old tty
 		sed -i "/$1.*$ttyCur/d" ./tables/User_Machine
 		#delete old user and machine in table User_Machine
 		# while read userName machineName dateStr timeStr ttyLogin
@@ -207,12 +207,53 @@ function connect_func {
 				;;
 				  
 
-				"su")
-					echo "Which user do you want to change to?"
-					read newUser
+				"su "*)				    
+				    oldUser=$1
+					machine=$2
+					newUser=$(echo $input | cut -d' ' -f2)
 
-				  ./commande_su $1 $2
+					flag1=false
 
+					while read ligne
+					do
+						if [[ $newUser == $(echo $ligne | cut -d' ' -f1) ]]; then
+							flag1=true
+						fi
+					done < ./tables/User
+
+					if [[ $flag1 == false ]]; then
+						echo "We can't find this user"
+						title $1 $2
+						continue
+					fi
+
+					echo "Please enter the password of $oldUser: "
+					read passwd
+					if [[ $passwd != $(grep "$oldUser" ./tables/User | cut -d' ' -f3) ]]; then
+						echo "Password incorrect!"
+						title $1 $2
+						continue
+					else
+						echo "Password correct"
+					fi
+
+					userLevel=$(grep "$newUser" ./tables/User | cut -d' ' -f2)
+					machineLevel=$(grep "$machine" ./tables/Machine | cut -d' ' -f2)
+					if [[ $userLevel > $machineLevel ]]; then
+						echo "$newUser doesn't have the permission to connect $machine"
+						title $1 $2
+						continue
+					else
+						ttyCur=$(echo $(tty) | sed "s/\///g")
+						# delete old tty
+						sed -i "/$oldUser.*$ttyCur/d" ./tables/User_Machine
+						date=$(date "+%Y-%m-%d %H:%M:%S")
+						echo $newUser $machine $date "null" $ttyCur >> ./tables/User_Machine
+						echo 'Connexion successful'
+						echo "We already connect $newUser to $machine"
+						connect_func $newUser $machine
+					fi
+				    break
 				;;
 
 				"passwd")
@@ -229,7 +270,7 @@ function connect_func {
 
 				"write "*"@"*" "*)
 
-				  write $input
+				  write $1 $input
 
 				;;
 
@@ -289,17 +330,8 @@ function connect {
 }
 
 function su {
-	if [[ $# -eq 2 ]]
-	then
 
-			#statements
-			echo "Mode Connect: connet to $2"
-			echo "Password of $3:"
-			read -s password
-			echo 'Wait...'
-			connectLogin $2 $1 $password
-			break
-	fi
+	echo 'su'
 }
 
 function passwd {

@@ -1,4 +1,263 @@
 #!/bin/bash
 
+
+function title {
+	echo -n "rvsh> "
+
+}
+
+
+
+
+# main
 echo 'Now you are ready on admin mode!'
-echo 'rvsh>'
+title 
+while read input
+do
+
+		if [[ "$input" != "exit" ]]; then
+
+		case "$input" in
+
+		"host")
+
+		 echo "You want to add a machine, remove a machine or connect two machines?"
+		 echo "'add' for addtion, 'remove' for removing, 'attach' for attach"
+		 read opt
+		 if [[ $opt  == 'add' ]]
+		 then
+		 	flagExistMachine=false
+		 	echo "Give the name of the machine you want to add"
+		 	read name
+		 	while read machineName
+					do
+						machineName=$(echo $machineName | cut -d' ' -f1 )
+						if [[ $name == $machineName ]]
+						then
+							flagExistMachine=true
+
+						fi
+			done < ./tables/Machine
+
+			if [[ $flagExistMachine == false ]]
+			then
+				echo "Set priority of the machine you want to add"
+				read priority
+				echo $name $priority >> ./tables/Machine
+				echo "We add machine $name to the system successfully"
+			else
+				echo "$name is already exist in our system! "
+			fi
+
+
+		 elif [[ $opt == 'remove' ]]
+		 then
+
+		 	flagExistMachine=false
+		 	flagLoginMachine=false
+
+		 	echo "Give the name of the machine you want to remove"
+		 	read name
+		 	while read machineName
+					do
+						machineName=$(echo $machineName | cut -d' ' -f1 )
+						if [[ $name == $machineName ]]
+						then
+							flagExistMachine=true
+
+						fi
+			done < ./tables/Machine
+			while read line
+					do
+						machineName=$(echo $line | cut -d' ' -f2 )
+						if [[ $name == $machineName ]]
+						then
+							flagLoginMachine=true
+
+						fi
+			done < ./tables/User_Machine
+
+			if [[ $flagExistMachine == true ]] && [[ $flagLoginMachine == false ]] 
+			then
+				sed -i "/^$name .*$/d" ./tables/Machine
+				sed -i "/^$name .*$/d" ./tables/Machine_Relie
+				sed -i "/^.* $name$/d" ./tables/Machine_Relie
+				echo "We already remove machine $name"
+			elif [[ $flagLoginMachine == true ]]
+			then
+				echo "$name is already logined"
+			else
+				echo "$name not exist "
+			fi
+
+		 elif [[ $opt == 'attach' ]]
+		 then
+			echo "Give the name of the machine1"
+		 	read name1
+		 	echo "Give the name of the machine2"
+		 	read name2
+
+		 	flagExistMachine1=false
+		 	flagExistMachine1=false
+		 	while read machineName
+			do
+				machineName=$(echo $machineName | cut -d' ' -f1 )
+				if [[ $name1 == $machineName ]]
+				then
+					flagExistMachine1=true
+				elif [[ $name2 == $machineName ]]
+				then
+					flagExistMachine2=true
+				fi
+			done < ./tables/Machine
+
+
+			if [[ $flagExistMachine1 == true ]] && [[ $flagExistMachine2 == true ]] 
+			then
+				echo $name1 $name2 >> ./tables/Machine_Relie
+				echo $name2 $name1 >> ./tables/Machine_Relie
+				echo "attach successfully two machines: $name1, $name2"
+			elif [ $flagLoginMachine1 == false ]
+			then
+				echo "$name1 is not exist"
+			else
+				echo "$name2 is not exist "
+			fi
+
+			
+
+
+		 else
+		 echo "Please give a right operation!"
+		 fi
+		 ;;
+
+
+		"users")
+		 echo "You want to add an user or remove an user? 'add' for addtion, 'remove' for removing"
+		 read opt
+		 if [[ $opt  == 'add' ]]
+		 then
+		 	flagExistUser=false
+		 	echo "Give the name of the user you want to add"
+		 	read name
+		 	while read userName
+					do
+						userName=$(echo $userName | cut -d' ' -f1 )
+						if [[ $name == $userName ]]
+						then
+							flagExistUser=true
+
+						fi
+			done < ./tables/User
+
+			if [[ $flagExistUser == false ]]
+			then
+				echo "Set password of the user you want to add"
+				read password
+				echo "Set priority of the user you want to add"
+				read priority
+				echo "Set finger of the user you want to add"
+				read message
+				new_message=$(echo $message | sed  "s/ /_/g")
+
+				echo $name $priority $password $new_message >> ./tables/User
+				echo "$name is added"
+			else
+				echo "$name is already exist in our system! "
+			fi
+
+
+		 elif [[ $opt == 'remove' ]]
+		 then
+
+		 	flagExistUser=false
+		 	flagLoginUser=false
+
+		 	echo "Give the name of the user you want to remove"
+		 	read name
+		 	while read userName
+					do
+						userName=$(echo $userName | cut -d' ' -f1 )
+						if [[ $name == $userName ]]
+						then
+							flagExistUser=true
+
+						fi
+			done < ./tables/User
+			while read userName
+					do
+						userName=$(echo $userName | cut -d' ' -f1 )
+						if [[ $name == $userName ]]
+						then
+							flagLoginUser=true
+
+						fi
+			done < ./tables/User_Machine
+
+			if [[ $flagExistUser == true ]] && [[ $flagLoginUser == false ]] && [[ $name != 'admin' ]]
+			then
+				sed -i "/^$name .*$/d" ./tables/User
+				echo "$name is removed"
+
+			else
+				echo "$name not exit or it is already logined"
+
+			fi
+
+		 else
+		 echo "Please give a right operation!"
+		 fi
+		 ;;
+		 
+
+		"afinger")
+
+		 
+		 	flagExistUser=false
+
+		 	echo "Give the name of the user you want to remove"
+		 	read name
+		 	while read userName
+					do
+						userName=$(echo $userName | cut -d' ' -f1 )
+						if [[ $name == $userName ]]
+						then
+							flagExistUser=true
+
+						fi
+			done < ./tables/User
+
+			if [[ $flagExistUser == true ]]
+			then
+				echo "Please give a finger"
+				read message
+				new_message=$(echo $message | sed  "s/ /_/g")
+				sed -i "s/\($name [^ ]* [^ ]* \)\([^ ]*\)/\1$new_message/" ./tables/User
+				echo "We already added a finger to $name"
+			else
+				echo "$name not exit"
+
+			fi
+		 ;;
+
+		*)
+
+		  echo ""
+
+		  echo $input": command not found"
+		  echo "host: add, remove or attach machines 
+afinger: give a finger to the user 
+users: add or remove users"
+
+		  echo ""		  
+		;;
+
+	   esac
+	    fi
+	title 
+done
+	echo ""
+	echo "Exit Admin"
+	echo ""
+}
